@@ -1,7 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
-const routes: Routes = [];
+import { RtcComponent } from './component/rtc/rtc.component';
+const routes: Routes = [
+  {
+    path:'**',
+    component:RtcComponent
+  }
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
