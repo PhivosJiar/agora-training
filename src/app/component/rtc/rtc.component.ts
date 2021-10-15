@@ -26,7 +26,7 @@ export class RtcComponent implements OnInit {
     await this.rtcService.createAudioTrack();
     await this.rtcService.createVideoTrack();
 
-    
+    this.rtcService.publish();
     let rtc = this.rtcService.getRtc();
     rtc.client!.on("user-published", async (user, mediaType) => {
       // 开始订阅远端用户。
@@ -66,7 +66,7 @@ export class RtcComponent implements OnInit {
     });
     // let listen = await this.rtcService.listenPublish();
     // console.log(listen)
-    this.rtcService.publish();
+
 
   }
   
