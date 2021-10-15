@@ -25,7 +25,7 @@ export class RtcService {
     // 替换成你自己项目的 App ID。
     appId: '18e175f4a5704f588c910d176ca51752',
     // 如果你的项目开启了 App 证书进行 Token 鉴权，这里填写生成的 Token 值。
-    channel: "test",
+    channel: "channel",
     token: null
   }
 
