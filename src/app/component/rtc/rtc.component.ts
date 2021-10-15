@@ -26,7 +26,7 @@ export class RtcComponent implements OnInit {
     this.rtcService.joinRTCChannel(this.uid);
     await this.rtcService.createAudioTrack();
     await this.rtcService.createVideoTrack();
-    this.rtcService.publish();
+
     
     let rtc = this.rtcService.getRtc();
     rtc.client!.on("user-published", async (user, mediaType) => {
@@ -39,16 +39,18 @@ export class RtcComponent implements OnInit {
         // 订阅完成后，从 `user` 中获取远端视频轨道对象。
         const remoteVideoTrack = user.videoTrack;
         // 动态插入一个 DIV 节点作为播放远端视频轨道的容器。
-        const playerContainer = document.createElement("div");
-        // 给这个 DIV 节点指定一个 ID，这里指定的是远端用户的 UID。
-        playerContainer.id = user.uid.toString();
-        playerContainer.style.width = "640px";
-        playerContainer.style.height = "480px";
-        document.body.append(playerContainer);
+        const playerContainer = document.getElementById(`play-div`);
+        playerContainer && user.videoTrack?.play(playerContainer);
+        // const playerContainer = document.createElement("div");
+        // // 给这个 DIV 节点指定一个 ID，这里指定的是远端用户的 UID。
+        // playerContainer.id = user.uid.toString();
+        // playerContainer.style.width = "640px";
+        // playerContainer.style.height = "480px";
+        // document.body.append(playerContainer);
     
         // 订阅完成，播放远端音视频。
         // 传入 DIV 节点，让 SDK 在这个节点下创建相应的播放器播放远端视频。
-        remoteVideoTrack!.play(playerContainer);
+        // remoteVideoTrack!.play(playerContainer);
     
         // 也可以只传入该 DIV 节点的 ID。
         // remoteVideoTrack.play(playerContainer.id);
@@ -62,8 +64,10 @@ export class RtcComponent implements OnInit {
         remoteAudioTrack!.play();
       }
     });
-    // let listen = await this.rtcService.listenPublish();
-    // console.log(listen)
+
+
+    this.rtcService.publish();
   }
+  
   
 }
