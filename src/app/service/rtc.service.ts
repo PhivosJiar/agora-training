@@ -38,11 +38,11 @@ export class RtcService {
     return this.rtc.client;
   }
 
-  async joinRTCChannel(uid: string): Promise<UID | null | undefined> {
+  async joinRTCChannel(): Promise<UID | null | undefined> {
     if (!this.rtc.client) {
       return;
     }
-    this.rtc.uid = await this.rtc.client.join(this.Agora.appId, this.Agora.channel, this.Agora.token, uid);
+    this.rtc.uid = await this.rtc.client.join(this.Agora.appId, this.Agora.channel, this.Agora.token, this.rtc.uid);
     return this.rtc.uid;
   }
 
