@@ -29,6 +29,7 @@ export class RtcService {
     token: null
   }
 
+  
   initRTCClient(): IAgoraRTCClient {
     // 设置 SDK 的日志输出级别。选择一个级别，你就可以看到在该级别及该级别以上所有级别的日志信息。
     AgoraRTC.setLogLevel(2);
