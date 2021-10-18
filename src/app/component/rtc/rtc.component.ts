@@ -97,7 +97,7 @@ export class RtcComponent implements OnInit {
     playerContainer.id = id;
     playerContainer.style.flexGrow = "1";
     playerContainer.style.flexShrink = "1";
-    playerContainer.style.width = "auto";
+    playerContainer.style.width = "50vw";
     playerContainer.style.height = "auto";
     return playerContainer
   }
