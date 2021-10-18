@@ -94,22 +94,39 @@ export class RtcComponent implements OnInit {
 
   setContainer(id: string) {
     const playerContainer = document.createElement("div");
+    if(this.visible){
+      playerContainer.style.width = "50vw";
+      
+    }else{
+      playerContainer.style.width = "100vw";
+    }
     playerContainer.id = id;
+    playerContainer.className = 'childCanvas'
     playerContainer.style.flexGrow = "1";
     playerContainer.style.flexShrink = "1";
-    playerContainer.style.width = "50vw";
-    playerContainer.style.height = "auto";
     return playerContainer
   }
-
+  /**
+   * 監聽畫面變動
+   * 
+   * 
+   */
   onResize(event: any) {
-    console.log(event)
-    console.log(this.visible)
     const w = event.target.innerWidth;
     if (w >= 768) {
       this.visible = true;
+      Container.style.flexDirection = "row";
+      const childCanvas:any = document.getElementsByClassName("childCanvas");
+      for(let i=0 ; i< childCanvas.length ;i++){
+        childCanvas[i].style.width="50vw";
+      }
     } else {
       this.visible = false;
+      Container.style.flexDirection = "column";
+      const childCanvas:any = document.getElementsByClassName("childCanvas");
+      for(let i=0 ; i< childCanvas.length ;i++){
+        childCanvas[i].style.width="100vw";
+      }
     }
   }
 }
