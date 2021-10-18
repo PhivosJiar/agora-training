@@ -23,21 +23,20 @@ export class RtcComponent implements OnInit {
 
   async startBasicCall() {
     this.rtcService.initRTCClient()
+    this.listenUserInivte();
     this.rtcService.joinRTCChannel();
     await this.rtcService.createAudioTrack();
     await this.rtcService.createVideoTrack().then(async videoTrack => {
       this.canvasPrint(undefined,videoTrack);
     });
-    let rtc = this.rtcService.getRtc();
-    // rtc.client?.setClientRole('host');
     this.rtcService.publish().then(() => {
     });
-    await this.test();
-    
+
+
   }
 
 
-  test() {
+  listenUserInivte() {
     let rtc = this.rtcService.getRtc();
     rtc.client!.on("user-published", async (user, mediaType) => {
       // 开始订阅远端用户。
@@ -45,7 +44,6 @@ export class RtcComponent implements OnInit {
 
       // 表示本次订阅的是视频。
       if (mediaType === "video") {
-        console.log(user)
         this.canvasPrint(user)
       }
 
