@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { RtcService } from 'src/app/service/rtc.service';
 import AgoraRTC, { IAgoraRTCRemoteUser, ILocalVideoTrack } from "agora-rtc-sdk-ng"
 
-const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
+const Container = document.createElement("div");
 @Component({
   selector: 'app-rtc',
   templateUrl: './rtc.component.html',
@@ -11,12 +11,17 @@ const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 })
 export class RtcComponent implements OnInit {
   uid: string = ''
+  visible: boolean = false;
   constructor(
     private rtcService: RtcService
   ) { }
 
   ngOnInit(): void {
-    this.startBasicCall()
+    this.startBasicCall();
+    if (window.screen.width > 780) {
+      this.visible = true;
+    }
+    this.setParentContainer();
   }
 
   async startBasicCall() {
@@ -57,24 +62,54 @@ export class RtcComponent implements OnInit {
 
   canvasPrint(user?: IAgoraRTCRemoteUser, localVideoTrack?: ILocalVideoTrack | null | undefined) {
     if (user != null) {
-
-      const playerContainer = document.createElement("div");
-      playerContainer.id = user.uid.toString();
-      playerContainer.className = "canvas";
-      playerContainer.style.width = "100vw";
-      playerContainer.style.height = "50vh";
-      document.body.append(playerContainer);
-
+      let playerContainer = this.setContainer(user.uid.toString())
+      Container.append(playerContainer);
       playerContainer && user.videoTrack!.play(playerContainer);
     } else {
-      const playerContainer = document.createElement("div");
-      // // 给这个 DIV 节点指定一个 ID，这里指定的是远端用户的 UID。
-      playerContainer.id = 'canvas-me';
-      playerContainer.style.width = "100vw";
-      playerContainer.style.height = "50vh";
-      document.body.append(playerContainer);
+      let playerContainer = this.setContainer('canvas.me')
+      Container.append(playerContainer);
       playerContainer && localVideoTrack!.play(playerContainer);
     }
   }
 
+  setParentContainer() {
+    if (this.visible) {
+      Container.id = "container"
+      Container.style.width = "100vw"
+      Container.style.height = "100vh"
+      Container.style.display = "flex"
+      Container.style.flexDirection = "row"
+      Container.style.flexWrap = "wrap"
+      document.body.append(Container);
+    } else {
+      Container.id = "container"
+      Container.style.width = "100vw"
+      Container.style.height = "100vh"
+      Container.style.display = "flex"
+      Container.style.flexDirection = "column"
+      Container.style.flexWrap = "wrap"
+      document.body.append(Container);
+    }
+  }
+
+  setContainer(id: string) {
+    const playerContainer = document.createElement("div");
+    playerContainer.id = id;
+    playerContainer.style.flexGrow = "1";
+    playerContainer.style.flexShrink = "1";
+    playerContainer.style.width = "auto";
+    playerContainer.style.height = "auto";
+    return playerContainer
+  }
+
+  onResize(event: any) {
+    console.log(event)
+    console.log(this.visible)
+    const w = event.target.innerWidth;
+    if (w >= 768) {
+      this.visible = true;
+    } else {
+      this.visible = false;
+    }
+  }
 }
