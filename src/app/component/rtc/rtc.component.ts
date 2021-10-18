@@ -10,9 +10,7 @@ const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
   styleUrls: ['./rtc.component.scss']
 })
 export class RtcComponent implements OnInit {
-
   uid: string = ''
-  user: any = []
   constructor(
     private rtcService: RtcService
   ) { }
@@ -26,8 +24,9 @@ export class RtcComponent implements OnInit {
     this.listenUserInivte();
     this.rtcService.joinRTCChannel();
     await this.rtcService.createAudioTrack();
+
     await this.rtcService.createVideoTrack().then(async videoTrack => {
-      this.canvasPrint(undefined,videoTrack);
+      this.canvasPrint(undefined, videoTrack);
     });
     this.rtcService.publish().then(() => {
     });
@@ -41,10 +40,9 @@ export class RtcComponent implements OnInit {
     rtc.client!.on("user-published", async (user, mediaType) => {
       // 开始订阅远端用户。
       await rtc.client!.subscribe(user, mediaType);
-
       // 表示本次订阅的是视频。
       if (mediaType === "video") {
-        this.canvasPrint(user)
+        this.canvasPrint(user);
       }
 
       // 表示本次订阅的是音频。
@@ -59,27 +57,22 @@ export class RtcComponent implements OnInit {
 
   canvasPrint(user?: IAgoraRTCRemoteUser, localVideoTrack?: ILocalVideoTrack | null | undefined) {
     if (user != null) {
-      // const remoteVideoTrack = user.videoTrack;
 
-      // const playerContainer = document.createElement("div");
-      // playerContainer.id = user.uid.toString();
-      // playerContainer.style.width = "640px";
-      // playerContainer.style.height = "480px";
-      // document.body.append(playerContainer);
+      const playerContainer = document.createElement("div");
+      playerContainer.id = user.uid.toString();
+      playerContainer.className = "canvas";
+      playerContainer.style.width = "100vw";
+      playerContainer.style.height = "50vh";
+      document.body.append(playerContainer);
 
-      // remoteVideoTrack!.play(playerContainer);
-
-      const playerContainer = document.getElementById(`canvasOthers`);
-        playerContainer && user.videoTrack?.play(playerContainer);
+      playerContainer && user.videoTrack!.play(playerContainer);
     } else {
-      const playerContainer = document.getElementById(`canvasMe`);
-      // playerContainer && user.videoTrack?.play(playerContainer);
-      // const playerContainer = document.createElement("div");
+      const playerContainer = document.createElement("div");
       // // 给这个 DIV 节点指定一个 ID，这里指定的是远端用户的 UID。
-      // playerContainer.id = 'canvas-me';
-      // playerContainer.style.width = "640px";
-      // playerContainer.style.height = "480px";
-      // document.body.append(playerContainer);
+      playerContainer.id = 'canvas-me';
+      playerContainer.style.width = "100vw";
+      playerContainer.style.height = "50vh";
+      document.body.append(playerContainer);
       playerContainer && localVideoTrack!.play(playerContainer);
     }
   }

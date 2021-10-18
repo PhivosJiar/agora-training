@@ -1,5 +1,23 @@
-.canvasOthers {
-    width: 50vw;
-    height: 24vw;
-    background-color: bisque;
+@media (max-width: 767px) {
+    .canvasAll{
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        width: 100vw;
+        height: 100vh;
+        // overflow: hidden;
+    }
+    .canvas {
+        // flex-basis: 300px;
+        // flex-grow: 1;
+        // flex-shrink: 1;
+        // width: auto;
+        // height: auto;
+    }
+}
+@media (min-width: 768px) {
+    .canvas {
+        // width: 50vw;
+        // height: 24vw;
+    }
 }
