@@ -47,11 +47,11 @@ export class RtcComponent implements OnInit {
     let channel = await this.rtcService.createRTMChannel();
     
     await channel?.join();
-    channel?.on('ChannelMessage', function (message, memberId) {
+    this.rtcService.getRTMChannel()?.on('ChannelMessage', function (message, memberId) {
       // 你的代码：收到频道消息。
       console.log(message)
     });
-    channel?.on('MemberJoined', memberId => {
+    this.rtcService.getRTMChannel()?.on('MemberJoined', memberId => {
       console.log(memberId)
       // 你的代码：用户已加入频道。
       })

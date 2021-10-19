@@ -99,11 +99,12 @@ export class RtcService {
   }
 
   async rtmClientLogin() {
-
+    let now = Date.now().toString();
     const config = {
-      uid: Date.toString(),
+      uid: now,
       token: undefined
     }
+    console.log(config)
     await this.rtm.client!.login(config)
   }
 
@@ -127,5 +128,9 @@ export class RtcService {
 
   getRTMClient(){
     return this.rtm;
+  }
+
+  getRTMChannel(){
+    return this.rtm.channel
   }
 }
