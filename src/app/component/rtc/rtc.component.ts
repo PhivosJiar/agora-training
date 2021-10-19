@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RtcService } from 'src/app/service/rtc.service';
 import AgoraRTC, { IAgoraRTCRemoteUser, ILocalVideoTrack } from "agora-rtc-sdk-ng"
-
+import AgoraRTM from 'agora-rtm-sdk';
 
 const Container = document.createElement("div");
 @Component({
@@ -18,6 +18,7 @@ export class RtcComponent implements OnInit {
 
   ngOnInit(): void {
     this.startBasicCall();
+    this.startRTM();
     if (window.screen.width > 780) {
       this.visible = true;
     }
@@ -25,20 +26,38 @@ export class RtcComponent implements OnInit {
   }
 
   async startBasicCall() {
-    this.rtcService.initRTCClient()
+    await this.rtcService.initRTCClient()
+    await this.rtcService.joinRTCChannel();
     this.listenUserInivte();
-    this.rtcService.joinRTCChannel();
     await this.rtcService.createAudioTrack();
-
+    
     await this.rtcService.createVideoTrack().then(async videoTrack => {
       this.canvasPrint(undefined, videoTrack);
     });
+
     this.rtcService.publish().then(() => {
     });
 
 
   }
+  async startRTM() {
+    
+    await this.rtcService.initRTMClient();
+    await this.rtcService.rtmClientLogin();
+    let channel = await this.rtcService.createRTMChannel();
+    
+    await channel?.join();
+    channel?.on('ChannelMessage', function (message, memberId) {
+      // 你的代码：收到频道消息。
+      console.log(message)
+    });
+    channel?.on('MemberJoined', memberId => {
+      console.log(memberId)
+      // 你的代码：用户已加入频道。
+      })
+    let rtm = await this.rtcService.getRTMClient();
 
+  }
 
   listenUserInivte() {
     let rtc = this.rtcService.getRtc();
@@ -94,10 +113,9 @@ export class RtcComponent implements OnInit {
 
   setContainer(id: string) {
     const playerContainer = document.createElement("div");
-    if(this.visible){
+    if (this.visible) {
       playerContainer.style.width = "50vw";
-      
-    }else{
+    } else {
       playerContainer.style.width = "100vw";
     }
     playerContainer.id = id;
@@ -116,17 +134,27 @@ export class RtcComponent implements OnInit {
     if (w >= 768) {
       this.visible = true;
       Container.style.flexDirection = "row";
-      const childCanvas:any = document.getElementsByClassName("childCanvas");
-      for(let i=0 ; i< childCanvas.length ;i++){
-        childCanvas[i].style.width="50vw";
+      const childCanvas: any = document.getElementsByClassName("childCanvas");
+      for (let i = 0; i < childCanvas.length; i++) {
+        childCanvas[i].style.width = "50vw";
       }
     } else {
       this.visible = false;
       Container.style.flexDirection = "column";
-      const childCanvas:any = document.getElementsByClassName("childCanvas");
-      for(let i=0 ; i< childCanvas.length ;i++){
-        childCanvas[i].style.width="100vw";
+      const childCanvas: any = document.getElementsByClassName("childCanvas");
+      for (let i = 0; i < childCanvas.length; i++) {
+        childCanvas[i].style.width = "100vw";
       }
     }
   }
+  sendmessage(){
+    const message = JSON.stringify({
+      type: 'pin',
+      userId: '阿花'
+    });
+    this.rtcService.sendChannelMessage({ text: message }).then(()=>{
+      console.log('success')
+    })
+  }
 }
+
