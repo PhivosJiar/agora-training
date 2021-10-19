@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RtcService } from 'src/app/service/rtc.service';
 import AgoraRTC, { IAgoraRTCRemoteUser, ILocalVideoTrack } from "agora-rtc-sdk-ng"
-import AgoraRTM from 'agora-rtm-sdk';
+import AgoraRTM, { RtmClient } from 'agora-rtm-sdk';
 
 const Container = document.createElement("div");
 @Component({
@@ -11,6 +11,7 @@ const Container = document.createElement("div");
 })
 export class RtcComponent implements OnInit {
   uid: string = ''
+  token: string = '';
   visible: boolean = false;
   constructor(
     private rtcService: RtcService
@@ -18,53 +19,45 @@ export class RtcComponent implements OnInit {
 
   ngOnInit(): void {
     this.startBasicCall();
-    this.startRTM();
+    // this.startRTM();
+    console.log(navigator.userAgent)
+    //偵測視窗大小
     if (window.screen.width > 780) {
       this.visible = true;
     }
+
+    //set Canvas Container
     this.setParentContainer();
   }
 
   async startBasicCall() {
-    await this.rtcService.initRTCClient()
-    await this.rtcService.joinRTCChannel();
-    this.listenUserInivte();
+
+    await this.rtcService.initRTCClient();
+    this.listenUserInvite();
+
     await this.rtcService.createAudioTrack();
-    
+
     await this.rtcService.createVideoTrack().then(async videoTrack => {
       this.canvasPrint(undefined, videoTrack);
     });
 
-    this.rtcService.publish().then(() => {
-    });
-
+    await this.rtcService.getToken();
 
   }
   async startRTM() {
-    
+
     await this.rtcService.initRTMClient();
     await this.rtcService.rtmClientLogin();
-    let channel = await this.rtcService.createRTMChannel();
-    
-    await channel?.join();
-    this.rtcService.getRTMChannel()?.on('ChannelMessage', function (message, memberId) {
-      // 你的代码：收到频道消息。
-      console.log(message)
-    });
-    this.rtcService.getRTMChannel()?.on('MemberJoined', memberId => {
-      console.log(memberId)
-      // 你的代码：用户已加入频道。
-      })
-    let rtm = await this.rtcService.getRTMClient();
 
   }
 
-  listenUserInivte() {
+  listenUserInvite() {
     let rtc = this.rtcService.getRtc();
     rtc.client!.on("user-published", async (user, mediaType) => {
       // 开始订阅远端用户。
       await rtc.client!.subscribe(user, mediaType);
       // 表示本次订阅的是视频。
+
       if (mediaType === "video") {
         this.canvasPrint(user);
       }
@@ -77,6 +70,18 @@ export class RtcComponent implements OnInit {
         remoteAudioTrack!.play();
       }
     });
+
+    rtc.client!.on("user-left", async user => {
+      const playerContainer = document.getElementById(<string>user.uid);
+      playerContainer && playerContainer.remove();
+      console.log('user left')
+    })
+
+    rtc.client!.on("user-unpublished", async (user, mediaType) => {
+      const playerContainer = document.getElementById(<string>user.uid);
+      playerContainer && playerContainer.remove();
+    })
+
   }
 
   canvasPrint(user?: IAgoraRTCRemoteUser, localVideoTrack?: ILocalVideoTrack | null | undefined) {
@@ -147,14 +152,68 @@ export class RtcComponent implements OnInit {
       }
     }
   }
-  sendmessage(){
+  sendmessage() {
+    let rtmClient = this.rtcService.getRTMClient();
     const message = JSON.stringify({
       type: 'pin',
-      userId: '阿花'
+      userId: rtmClient.uid
     });
-    this.rtcService.sendChannelMessage({ text: message }).then(()=>{
+    this.rtcService.sendChannelMessage({ text: message }).then(() => {
       console.log('success')
     })
+  }
+
+  async joinRTMChannel(channelName: string) {
+    this.leaveRTMChannel();
+    let channel = await this.rtcService.createRTMChannel(channelName);
+
+    await channel?.join();
+    this.rtcService.getRTMChannel()?.on('ChannelMessage', function (message, memberId) {
+      console.log(message)
+    });
+    this.rtcService.getRTMChannel()?.on('MemberJoined', memberId => {
+      console.log(memberId)
+    })
+
+
+  }
+
+  leaveRTMChannel() {
+    this.rtcService.getRTMChannel()?.leave().then(() => {
+      console.log('leave success')
+    });
+  }
+
+  async leaveRTCChannel() {
+    this.rtcService.removeTrack();
+    let clinet = this.rtcService.getRtc().client?.remoteUsers.forEach(user => {
+      this.removeCanvas(<string>user.uid)
+    })
+
+    this.rtcService.leaveRTCChannel();
+  }
+
+  async shareScreen() {
+    let playerContainer = this.setContainer('shareScreen')
+    Container.append(playerContainer);
+    await this.rtcService.shareScreen().then(ScreenVideoTrack => {
+      console.log(ScreenVideoTrack)
+      playerContainer && ScreenVideoTrack!.play(playerContainer);
+
+
+    });
+    if (this.rtcService.getlocalScreenVideoTrack()) {
+      this.rtcService.getlocalScreenVideoTrack()!.on('track-ended', () => {
+        this.removeCanvas('shareScreen')
+        this.rtcService.shareScreenUnPublish()
+        this.rtcService.publish();
+      })
+    }
+  }
+
+  removeCanvas(Dom_id:string){
+    const playerContainer = document.getElementById(Dom_id);
+    playerContainer && playerContainer.remove();
   }
 }
 
