@@ -16,7 +16,6 @@ export class RtcComponent implements OnInit {
   constructor(
     private rtcService: RtcService
   ) { }
-
   ngOnInit(): void {
     this.startBasicCall();
     // this.startRTM();
