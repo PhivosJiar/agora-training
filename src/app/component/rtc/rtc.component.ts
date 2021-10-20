@@ -43,21 +43,26 @@ export class RtcComponent implements OnInit {
   listenUserInivte() {
     let rtc = this.rtcService.getRtc();
     rtc.client!.on("user-published", async (user, mediaType) => {
-      // 开始订阅远端用户。
       await rtc.client!.subscribe(user, mediaType);
-      // 表示本次订阅的是视频。
+
       if (mediaType === "video") {
         this.canvasPrint(user);
       }
 
       // 表示本次订阅的是音频。
       if (mediaType === "audio") {
-        // 订阅完成后，从 `user` 中获取远端音频轨道对象。
+
         const remoteAudioTrack = user.audioTrack;
-        // 播放音频因为不会有画面，不需要提供 DOM 元素的信息。
+
         remoteAudioTrack!.play();
       }
     });
+
+    rtc.client?.on("user-left",async (user)=>{
+      const playerContainer = document.getElementById(<string>user.uid);
+      playerContainer && playerContainer.remove();
+      console.log('user left')
+    })
   }
 
   canvasPrint(user?: IAgoraRTCRemoteUser, localVideoTrack?: ILocalVideoTrack | null | undefined) {
