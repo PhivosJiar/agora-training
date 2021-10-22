@@ -8,6 +8,8 @@ import { NullTemplateVisitor } from '@angular/compiler';
 
 const API_DOMAIN = 'https://agora-token-go.herokuapp.com/'
 const FETCH_RTC_TOKEN = 'fetch_rtc_token';
+const FETCH_RTM_TOKEN = 'fetch_rtm_token';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -57,6 +59,7 @@ export class RtcService {
   }
   getToken(): void {
     let url = this.setUrl(FETCH_RTC_TOKEN);
+    let rtmUrl = this.setUrl(FETCH_RTM_TOKEN);
     let now = Number(Date.now() % 1000000)
     this.rtc.uid = now;
     this.http.post<any>(url, {
@@ -69,6 +72,15 @@ export class RtcService {
     }).subscribe(async res => {
       await this.joinRTCChannel(res.token)
       await this.publish();
+    });
+    this.http.post<any>('http://localhost:8082/fetch_rtm_token',{
+      uid:now.toString(),
+    }, {
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8'
+      }
+    }).subscribe(async res => {
+      this.rtmClientLogin(now.toString(),res.token)
     });
   }
 
@@ -131,11 +143,11 @@ export class RtcService {
     })
   }
 
-  async rtmClientLogin() {
+  async rtmClientLogin(uid:string,token:string) {
     let now = Date.now().toString();
     const config = {
-      uid: now,
-      token: undefined
+      uid: uid,
+      token: token
     }
     console.log(config)
     await this.rtm.client!.login(config)

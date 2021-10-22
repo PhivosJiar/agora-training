@@ -18,7 +18,7 @@ export class RtcComponent implements OnInit {
   ) { }
   ngOnInit(): void {
     this.startBasicCall();
-    // this.startRTM();
+    this.startRTM();
     console.log(navigator.userAgent)
     //偵測視窗大小
     if (window.screen.width > 780) {
@@ -46,7 +46,7 @@ export class RtcComponent implements OnInit {
   async startRTM() {
 
     await this.rtcService.initRTMClient();
-    await this.rtcService.rtmClientLogin();
+    // this.rtcService.rtmClientLogin();
 
   }
 
